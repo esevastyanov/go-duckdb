@@ -129,6 +129,8 @@ func scan(vector C.duckdb_vector, rowIdx C.idx_t) (any, error) {
 		return get[float32](vector, rowIdx), nil
 	case C.DUCKDB_TYPE_DOUBLE:
 		return get[float64](vector, rowIdx), nil
+	case 32:
+		return time.UnixMicro(int64(get[C.duckdb_timestamp](vector, rowIdx).micros)).UTC(), nil
 	case C.DUCKDB_TYPE_TIMESTAMP:
 		return time.UnixMicro(int64(get[C.duckdb_timestamp](vector, rowIdx).micros)).UTC(), nil
 	case C.DUCKDB_TYPE_DATE:
@@ -216,6 +218,8 @@ func (r *rows) ColumnTypeScanType(index int) reflect.Type {
 	case C.DUCKDB_TYPE_DECIMAL:
 		return reflect.TypeOf(Decimal{})
 	case C.DUCKDB_TYPE_TIMESTAMP_S:
+		return reflect.TypeOf(time.Time{})
+	case 32:
 		return reflect.TypeOf(time.Time{})
 	case C.DUCKDB_TYPE_TIMESTAMP_MS:
 		return reflect.TypeOf(time.Time{})
@@ -467,6 +471,8 @@ func typeName(t C.duckdb_type) string {
 		return "FLOAT"
 	case C.DUCKDB_TYPE_DOUBLE:
 		return "DOUBLE"
+	case 32:
+		return "TIMESTAMP WITH TIME ZONE"
 	case C.DUCKDB_TYPE_TIMESTAMP:
 		return "TIMESTAMP"
 	case C.DUCKDB_TYPE_DATE:
